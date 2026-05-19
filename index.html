@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>El Impostor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="screen active" id="homeScreen" aria-labelledby="homeTitle">
+      <div class="topbar">
+        <div>
+          <p class="eyebrow">juego online por salas</p>
+          <h1 id="homeTitle">El Impostor</h1>
+        </div>
+        <div class="mini-logo" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="setup-layout">
+        <form class="panel setup-panel" id="createRoomForm">
+          <div class="section-title">
+            <h2>Crear sala</h2>
+            <span>lider</span>
+          </div>
+
+          <div class="field-row">
+            <label for="hostNameInput">Tu nombre</label>
+            <input class="player-name full" id="hostNameInput" type="text" maxlength="18" placeholder="Ej: Marcos" autocomplete="off" />
+          </div>
+
+          <div class="field-row">
+            <label for="categorySelect">Categoria</label>
+            <select id="categorySelect"></select>
+          </div>
+
+          <label class="switch-row" for="hintToggle">
+            <span>
+              <strong>Pista para el impostor</strong>
+              <small>Le da una ayuda vaga para que pueda chamuyar mejor.</small>
+            </span>
+            <input type="checkbox" id="hintToggle" checked />
+            <span class="switch" aria-hidden="true"></span>
+          </label>
+
+          <p class="error-message" id="createError" role="alert"></p>
+          <button class="primary-btn" type="submit">Crear sala</button>
+        </form>
+
+        <form class="panel setup-panel" id="joinRoomForm">
+          <div class="section-title">
+            <h2>Unirse</h2>
+            <span>invitado</span>
+          </div>
+
+          <div class="field-row">
+            <label for="joinNameInput">Tu nombre</label>
+            <input class="player-name full" id="joinNameInput" type="text" maxlength="18" placeholder="Ej: Jere" autocomplete="off" />
+          </div>
+
+          <div class="field-row">
+            <label for="roomCodeInput">Codigo de sala</label>
+            <input class="player-name full code-input" id="roomCodeInput" type="text" maxlength="6" placeholder="ABC123" autocomplete="off" />
+          </div>
+
+          <p class="error-message" id="joinError" role="alert"></p>
+          <button class="secondary-btn wide" type="submit">Entrar a la sala</button>
+        </form>
+      </div>
+
+      <div class="panel notice-panel" id="firebaseNotice">
+        <strong>Falta configurar Firebase</strong>
+        <span>Cuando pegues tus claves en <code>firebase-config.js</code>, las salas van a funcionar entre pestañas, compus y celulares.</span>
+      </div>
+    </section>
+
+    <section class="screen" id="lobbyScreen" aria-labelledby="lobbyTitle">
+      <div class="game-hud">
+        <div>
+          <p class="eyebrow">lobby</p>
+          <h2 id="lobbyTitle">Sala <span id="roomCodeLabel"></span></h2>
+        </div>
+        <div class="hud-actions">
+          <button class="secondary-btn small" type="button" id="copyInviteBtn">Copiar link</button>
+          <button class="secondary-btn small" type="button" id="leaveRoomBtn">Salir</button>
+        </div>
+      </div>
+
+      <div class="setup-layout">
+        <div class="panel setup-panel">
+          <div class="section-title">
+            <h2>Jugadores</h2>
+            <span id="lobbyCount">0/10</span>
+          </div>
+          <div class="lobby-list" id="lobbyPlayers"></div>
+          <p class="mini-help" id="lobbyHelp">Minimo 4 jugadores para empezar.</p>
+        </div>
+
+        <div class="panel setup-panel host-panel" id="hostPanel">
+          <h2>Controles del lider</h2>
+          <p class="mini-help">Pasa el link, espera a que entren todos y arranca la partida.</p>
+          <button class="primary-btn" type="button" id="startGameBtn">Iniciar partida</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="secretScreen" aria-labelledby="secretTitle">
+      <div class="compact-header">
+        <p class="eyebrow">tu pantalla secreta</p>
+        <h2 id="secretTitle">Jugador: <span id="secretPlayerName"></span></h2>
+      </div>
+
+      <div class="secret-layout">
+        <div class="panel reveal-panel">
+          <div class="avatar-stage" id="secretAvatar"></div>
+          <div class="role-card" id="roleCard">
+            <p id="roleLabel"></p>
+            <h3 id="roleValue"></h3>
+            <p class="hint-text hidden" id="hintText"></p>
+          </div>
+          <p class="mini-help">No muestres esta pantalla. Cuando todos terminen de mirar, el lider pasa a la mesa.</p>
+          <button class="primary-btn host-only" type="button" id="goTableBtn">Ir a la mesa</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="tableScreen" aria-labelledby="tableTitle">
+      <div class="game-hud">
+        <div>
+          <p class="eyebrow">mesa</p>
+          <h2 id="tableTitle">Turno de: <span id="currentTurnName"></span></h2>
+        </div>
+        <div class="hud-actions host-only">
+          <button class="secondary-btn small" type="button" id="nextTurnBtn">Siguiente turno</button>
+          <button class="primary-btn small" type="button" id="goVoteBtn">Votar</button>
+        </div>
+      </div>
+
+      <div class="table-zone">
+        <div class="table-scene" id="tableScene">
+          <div class="table">
+            <div class="pizza" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="soda" aria-hidden="true"></div>
+            <div class="cards" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="papers" aria-hidden="true"><i></i><i></i></div>
+            <div class="chips" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div id="tablePlayers"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="voteScreen" aria-labelledby="voteTitle">
+      <div class="compact-header">
+        <p class="eyebrow">votacion</p>
+        <h2 id="voteTitle">¿Quien es el impostor?</h2>
+      </div>
+
+      <div class="panel vote-panel">
+        <div class="vote-grid" id="voteButtons"></div>
+        <p class="mini-help" id="voteStatus"></p>
+        <div class="final-reveal hidden" id="finalReveal">
+          <p>El impostor era</p>
+          <h3 id="impostorName"></h3>
+          <span id="realWord"></span>
+        </div>
+        <button class="primary-btn hidden host-only" type="button" id="playAgainBtn">Nueva ronda</button>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
